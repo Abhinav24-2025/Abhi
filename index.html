@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0907">
+<meta name="description" content="Cutiee_Kitttuuu 🌻 — a personal ghazal mixtape.">
+<title>Cutiee_Kitttuuu 🌻</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Kalam:wght@400;700&display=swap');
+:root{--bg:#0b0907;--panel:#12100c;--line:#3a2b18;--gold:#d99a2b;--cream:#ead8b5;--muted:#9f8b6d;--soft:#1b1710}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--cream)}
+body{font-family:'Cormorant Garamond',serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.12;background-image:radial-gradient(#fff 0.7px,transparent .7px);background-size:5px 5px;mix-blend-mode:screen}
+button{font:inherit;color:inherit}
+.wrap{width:min(1440px,94vw);margin:30px auto 18px;border:1px solid #3c2e1d;border-radius:14px;padding:30px;box-shadow:0 0 70px #000 inset,0 0 50px #000;background:linear-gradient(120deg,#100d09,#090806 60%,#0d0b08)}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;padding:4px 10px 26px;border-bottom:1px solid var(--line)}
+.brand{font-family:Kalam,cursive;font-size:clamp(42px,5.5vw,82px);line-height:.9;color:#e1a32f;text-shadow:0 2px 18px #8b5b12}
+.tag{font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:.16em;font-size:12px;margin-top:15px}
+.meta{font-family:'DM Mono',monospace;color:var(--muted);font-size:12px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:minmax(360px,.92fr) minmax(420px,1.08fr);gap:28px;margin-top:28px}
+.player,.playlist{border:1px solid #302518;border-radius:16px;background:linear-gradient(145deg,#15110b,#0b0907);box-shadow:0 25px 50px #0008;padding:26px}
+.player{display:flex;flex-direction:column;min-height:650px}
+.kicker{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.18em;color:var(--gold);text-align:center}
+.cassette{margin:25px auto 18px;width:min(470px,92%);aspect-ratio:1.55/1;border-radius:18px;background:linear-gradient(#c99c58,#8c6025 48%,#5a3a16);border:9px solid #21170b;box-shadow:inset 0 0 0 2px #d0a45c,0 18px 35px #000;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cassette:before,.cassette:after{content:"";position:absolute;width:95px;height:95px;border-radius:50%;background:radial-gradient(circle,#0a0907 0 18%,#33210e 19% 35%,#090806 36% 48%,#6f481d 49% 52%,#0a0907 53%);top:50%;transform:translateY(-50%);box-shadow:0 0 0 8px #a4773a}
+.cassette:before{left:9%}.cassette:after{right:9%}
+.label{position:relative;z-index:2;width:55%;padding:28px 12px;text-align:center;background:#d9b676;color:#21170b;border-radius:5px;box-shadow:0 2px 12px #0007}
+.label:before{content:"";position:absolute;left:8%;right:8%;top:14px;border-top:1px solid #8e6a36}
+.label b{display:block;font-family:Kalam,cursive;font-size:25px}.label span{display:block;margin-top:4px;font-size:17px}
+.now{margin:8px 0 0;text-align:center}.now h2{font-size:30px;margin:5px 0 0;font-weight:600}.now p{font-family:'DM Mono',monospace;color:var(--gold);font-size:12px;margin:5px 0}
+.wave{height:38px;margin:24px 8px 8px;display:flex;align-items:end;gap:3px;justify-content:center;overflow:hidden}.wave i{display:block;width:3px;background:#c98c25;border-radius:3px;opacity:.9;animation:pulse 1.2s ease-in-out infinite alternate}.wave i:nth-child(3n){animation-delay:.2s}.wave i:nth-child(4n){animation-delay:.4s}
+@keyframes pulse{to{height:75%}}
+.progress{display:flex;align-items:center;gap:12px;font-family:'DM Mono',monospace;color:var(--muted);font-size:11px}.progress input{flex:1;accent-color:var(--gold)}
+.controls{display:flex;justify-content:center;align-items:center;gap:34px;margin:20px 0}.ctrl{border:0;background:none;cursor:pointer;font-size:28px;color:var(--cream);transition:.2s}.ctrl:hover{color:var(--gold);transform:scale(1.08)}.play{width:68px;height:68px;border-radius:50%;background:var(--gold);color:#161006;font-family:'DM Mono',monospace;font-size:22px;border:0;cursor:pointer;box-shadow:0 8px 25px #0008}.subnote{text-align:center;color:#8f795b;font-style:italic;font-size:17px;margin-top:auto}
+.listhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.listhead b{font-family:'DM Mono',monospace;color:var(--gold);letter-spacing:.1em;font-size:12px}.listhead span{font-family:'DM Mono',monospace;color:var(--muted);font-size:11px}
+.track{display:grid;grid-template-columns:42px 58px 1fr 52px;gap:14px;align-items:center;padding:13px 8px;border-bottom:1px dashed #352816;cursor:pointer;transition:.2s;border-radius:10px}.track:hover{background:#19140d}.track.active{background:linear-gradient(90deg,#20180d,#151009);outline:1px solid #493316}.num{font-family:'DM Mono',monospace;color:var(--gold);font-size:20px;text-align:center}.cover{width:58px;height:58px;object-fit:cover;border-radius:5px;filter:saturate(.8) sepia(.12)}.tn{min-width:0}.title{font-size:21px;font-weight:600;line-height:1.05}.artist{font-family:'DM Mono',monospace;color:var(--gold);font-size:11px;margin-top:5px}.dur{font-family:'DM Mono',monospace;color:var(--muted);font-size:11px;text-align:right}
+footer{display:flex;justify-content:space-between;gap:20px;padding:20px 8px 0;color:#735d42;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.05em}.sun{font-size:20px}
+#yt{position:fixed;width:1px;height:1px;left:-10px;bottom:-10px;opacity:.001;pointer-events:none}
+@media(max-width:900px){.wrap{padding:18px;margin-top:12px}.grid{grid-template-columns:1fr}.player{min-height:unset}.playlist{padding:16px}.track{grid-template-columns:32px 52px 1fr 44px;gap:10px}.cover{width:52px;height:52px}.title{font-size:18px}.brand{font-size:48px}.meta{display:none}}
+@media(max-width:520px){header{align-items:flex-start;flex-direction:column}.tag{font-size:10px}.player{padding:18px}.cassette{width:100%}.cassette:before,.cassette:after{width:64px;height:64px}.label{width:60%;padding:20px 6px}.label b{font-size:18px}.label span{font-size:13px}.controls{gap:22px}.track{grid-template-columns:26px 46px 1fr 38px}.cover{width:46px;height:46px}.title{font-size:16px}.dur{font-size:9px}.artist{font-size:9px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><div class="brand">Cutiee_Kitttuuu 🌻</div><div class="tag">~ some melodies, a thousand feelings ~</div></div>
+  <div class="meta">7 TRACKS · 1 HOUR, 1 MINUTE</div>
+</header>
+<div class="grid">
+<section class="player">
+  <div class="kicker">PLAYING NOW</div>
+  <div class="cassette"><div class="label"><b id="cassetteTitle">Tumko Dekhte Huve</b><span id="cassetteArtist">Abida Parveen</span></div></div>
+  <div class="now"><h2 id="nowTitle">Tumko Dekhte Huve</h2><p id="nowArtist">ABIDA PARVEEN</p></div>
+  <div class="wave" aria-hidden="true"></div>
+  <div class="progress"><span id="elapsed">0:00</span><input id="seek" type="range" min="0" max="100" value="0"><span id="duration">7:39</span></div>
+  <div class="controls">
+    <button class="ctrl" id="prev" aria-label="Previous">⏮</button>
+    <button class="play" id="play" aria-label="Play/Pause">▶</button>
+    <button class="ctrl" id="next" aria-label="Next">⏭</button>
+  </div>
+  <div class="subnote">“Music heals what words can’t.” 🌻</div>
+</section>
+<section class="playlist">
+  <div class="listhead"><b>● PLAYLIST</b><span>7 tracks · 1 hour, 1 minute</span></div>
+  <div id="tracks"></div>
+</section>
+</div>
+<footer><span>press play. feel everything. 🌻</span><span>made with ♡ for the love of ghazals</span></footer>
+</div>
+<div id="yt"></div>
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+const PLAYLIST_ID="PLt3Ip3iAiQF955awVaawhCJ9GfbBu6rDN";
+const tracks=[
+["Tumko Dekhte Huve","Abida Parveen","7:39","assets/cover-1.jpg"],
+["Tum Ko Dekhe Hue Zamane","Abida Parveen","7:43","assets/cover-2.jpg"],
+["Koi Samjhaye Kya Rang Hai (Live)","Ghulam Ali","13:01","assets/cover-3.jpg"],
+["Woh Humsafar Tha","Abida Parveen","8:31","assets/cover-4.jpg"],
+["Koi Samjhaye Ye Kya Rang Hai","Ghulam Ali","9:03","assets/cover-5.jpg"],
+["Ambwa Taley Saiyan Kab Se Akeli","Farida Khanum","8:08","assets/cover-6.jpg"],
+["Kaise Guzr Sakein Ge Zamane Bahar Ke","Farida Khanum","7:10","assets/cover-7.jpg"]
+];
+let index=0, player=null, ready=false, timer=null;
+const $=id=>document.getElementById(id);
+const list=$("tracks");
+tracks.forEach((t,i)=>{
+  const el=document.createElement("div"); el.className="track"+(i===0?" active":""); el.dataset.i=i;
+  el.innerHTML=`<div class="num">${String(i+1).padStart(2,"0")}</div><img class="cover" src="${t[3]}" alt=""><div class="tn"><div class="title">${t[0]}</div><div class="artist">${t[1]}</div></div><div class="dur">${t[2]}</div>`;
+  el.onclick=()=>selectTrack(i,true); list.appendChild(el);
+});
+document.querySelector(".wave").innerHTML=Array.from({length:48},(_,i)=>`<i style="height:${8+(i*17)%29}px"></i>`).join("");
+function selectTrack(i,playNow=false){
+  index=(i+tracks.length)%tracks.length; const t=tracks[index];
+  $("nowTitle").textContent=t[0]; $("nowArtist").textContent=t[1].toUpperCase(); $("cassetteTitle").textContent=t[0]; $("cassetteArtist").textContent=t[1]; $("duration").textContent=t[2]; $("elapsed").textContent="0:00"; $("seek").value=0;
+  document.querySelectorAll(".track").forEach((x,j)=>x.classList.toggle("active",j===index));
+  if(player&&ready){player.playVideoAt(index); if(!playNow) player.pauseVideo();}
+  else if(playNow) waitAndPlay();
+}
+function waitAndPlay(){ if(player&&ready){player.playVideoAt(index); player.playVideo();} }
+function onYouTubeIframeAPIReady(){
+  player=new YT.Player("yt",{height:"1",width:"1",playerVars:{listType:"playlist",list:PLAYLIST_ID,playsinline:1,controls:0,rel:0},events:{onReady:()=>{ready=true; if(location.hash==="#play") waitAndPlay();},onStateChange:e=>{
+    if(e.data===YT.PlayerState.PLAYING){$("play").textContent="Ⅱ"; startTimer();}
+    if(e.data===YT.PlayerState.PAUSED){$("play").textContent="▶"; stopTimer();}
+    if(e.data===YT.PlayerState.ENDED){selectTrack(index+1,true);}
+  }}});
+}
+$("play").onclick=()=>{if(!player||!ready)return; const s=player.getPlayerState(); if(s===YT.PlayerState.PLAYING)player.pauseVideo(); else waitAndPlay();};
+$("next").onclick=()=>selectTrack(index+1,true);
+$("prev").onclick=()=>selectTrack(index-1,true);
+$("seek").oninput=e=>{if(player&&ready){const d=player.getDuration()||0;player.seekTo(d*e.target.value/100,true)}};
+function fmt(s){s=Math.max(0,Math.floor(s||0));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}
+function startTimer(){stopTimer();timer=setInterval(()=>{if(!player)return;const c=player.getCurrentTime()||0,d=player.getDuration()||1;$("elapsed").textContent=fmt(c);$("duration").textContent=fmt(d);$("seek").value=(c/d)*100},500)}
+function stopTimer(){if(timer)clearInterval(timer)}
+selectTrack(0,false);
+</script>
+</body>
+</html>
