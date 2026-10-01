@@ -24,6 +24,11 @@ Examples
         --cols "Snow=snowmelt,Glacier=glacier_melt,Rain=rainfall,Base=baseflow" \
         --observed-col Qobs --out runoff.gif
 
+    # SPHY-style monthly output (Years, Months, QALLDTS, STotDTS, RTotDTS,
+    # GTotDTS, BTotDTS) - detected automatically; .xlsx/.csv/.txt all work
+    python runoff_animation.py --csv sphy_output.xlsx --basin "My basin" \
+        --out runoff.mp4
+
     # try it without data (synthetic, clearly labelled as such)
     python runoff_animation.py --demo --out demo.gif
 """
@@ -62,7 +67,9 @@ GRID = "#e4e3df"
 def parse_args():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("--csv", help="input CSV with date + component columns")
+    p.add_argument("--csv", help="input file (.csv, .txt tab/comma, .xlsx) "
+                                 "with date (or Years+Months) + component columns")
+    p.add_argument("--sheet", default=0, help="Excel sheet name/index")
     p.add_argument("--demo", action="store_true",
                    help="use synthetic demo data instead of a CSV")
     p.add_argument("--date-col", default="date")
@@ -80,9 +87,11 @@ def parse_args():
     p.add_argument("--window", type=int, default=0,
                    help="show only the last N time steps (scrolling view); "
                         "0 = whole period, axis fixed")
-    p.add_argument("--step", type=int, default=3,
-                   help="time steps advanced per frame")
-    p.add_argument("--fps", type=int, default=20)
+    p.add_argument("--step", type=int, default=None,
+                   help="time steps advanced per frame "
+                        "(default: 1 for monthly data, 3 otherwise)")
+    p.add_argument("--fps", type=int, default=None,
+                   help="frames per second (default: 6 for monthly, 20 otherwise)")
     p.add_argument("--dpi", type=int, default=120)
     p.add_argument("--out", default="runoff_animation.mp4",
                    help=".mp4 (needs ffmpeg) or .gif")
@@ -109,12 +118,53 @@ def demo_data():
     return df.clip(lower=0)
 
 
+# SPHY-style column names -> components (QALLDTS is the simulated total)
+SPHY_COLS = {"STotDTS": "snowmelt", "GTotDTS": "glacier_melt",
+             "RTotDTS": "rainfall", "BTotDTS": "baseflow", "QALLDTS": "total"}
+
+
+def read_table(path, sheet):
+    if path.lower().endswith((".xlsx", ".xls")):
+        try:
+            sheet = int(sheet)
+        except ValueError:
+            pass
+        return pd.read_excel(path, sheet_name=sheet)
+    # sep=None sniffs comma / tab / semicolon
+    return pd.read_csv(path, sep=None, engine="python")
+
+
+def years_months_to_date(df, ycol, mcol):
+    """Build a date from a Years column (often filled only on January rows)
+    and a Months column holding names ('January', 'June ') or numbers."""
+    years = pd.to_numeric(df[ycol], errors="coerce").ffill()
+    m = df[mcol].astype(str).str.strip()
+    month_num = pd.to_numeric(m, errors="coerce")
+    by_name = pd.to_datetime(m.str[:3], format="%b", errors="coerce").dt.month
+    month_num = month_num.fillna(by_name)
+    if years.isna().any() or month_num.isna().any():
+        bad = df.loc[years.isna() | month_num.isna(), [ycol, mcol]]
+        sys.exit(f"Could not parse year/month in rows:\n{bad.head()}")
+    return pd.to_datetime(dict(year=years.astype(int),
+                               month=month_num.astype(int), day=1))
+
+
 def load_data(a):
     if a.demo:
         return demo_data()
     if not a.csv:
         sys.exit("Give --csv <file> or --demo")
-    df = pd.read_csv(a.csv)
+    df = read_table(a.csv, a.sheet)
+    df.columns = [str(c).strip() for c in df.columns]
+    df = df.dropna(how="all")
+    lower = {c.lower(): c for c in df.columns}
+    if a.date_col not in df.columns and "years" in lower and "months" in lower:
+        df[a.date_col] = years_months_to_date(df, lower["years"], lower["months"])
+    if not a.cols:
+        sphy = {lower[k.lower()]: v for k, v in SPHY_COLS.items() if k.lower() in lower}
+        if sphy:
+            print(f"Using SPHY column mapping: {sphy}")
+            df = df.rename(columns=sphy)
     if a.cols:
         mapping = dict(kv.split("=") for kv in a.cols.split(","))
         bad = set(mapping.values()) - set(COMPONENTS)
@@ -128,6 +178,16 @@ def load_data(a):
         sys.exit(f"Missing component columns {missing}. Columns: {list(df.columns)}. "
                  "Use --cols to map them.")
     df[a.date_col] = pd.to_datetime(df[a.date_col])
+    df[COMPONENTS] = df[COMPONENTS].apply(pd.to_numeric, errors="coerce")
+    if "total" in df.columns:
+        diff = (df[COMPONENTS].sum(axis=1) - pd.to_numeric(df["total"], errors="coerce")).abs()
+        rel = diff / pd.to_numeric(df["total"], errors="coerce").abs().clip(lower=1e-9)
+        n_bad = int(((diff > 1e-3) & (rel > 0.01)).sum())
+        if n_bad:
+            print(f"Warning: in {n_bad} rows the components do not sum to the "
+                  "total column (>1% off). Check your columns.")
+        else:
+            print("Check OK: components sum to the total column.")
     keep = COMPONENTS + ([a.observed_col] if a.observed_col in df.columns else [])
     df = df.set_index(a.date_col)[keep].sort_index()
     if a.observed_col in df.columns:
@@ -148,6 +208,13 @@ def main():
     df[COMPONENTS] = df[COMPONENTS].fillna(0)
     if len(df) < 2:
         sys.exit("Need at least 2 time steps.")
+    monthly = bool((df.index.day == 1).all() and
+                   pd.Series(df.index).diff().dt.days.median() >= 28)
+    if a.step is None:
+        a.step = 1 if monthly else 3
+    if a.fps is None:
+        a.fps = 6 if monthly else 20
+    date_fmt = "%b %Y" if monthly else "%d %b %Y"
 
     has_obs = "observed" in df.columns
     dates = df.index
@@ -243,7 +310,7 @@ def main():
             t.set_text(f"{v:,.1f}  ({share:.0f}%)")
         obs = (f"   ·   observed {df['observed'].iloc[i]:,.1f} {a.units}"
                if has_obs and pd.notna(df["observed"].iloc[i]) else "")
-        date_txt.set_text(f"{dates[i]:%d %b %Y}   ·   total simulated "
+        date_txt.set_text(f"{dates[i].strftime(date_fmt)}   ·   total simulated "
                           f"{tot:,.1f} {a.units}{obs}")
         return dyn
 

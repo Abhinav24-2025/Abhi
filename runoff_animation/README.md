@@ -15,6 +15,24 @@ CSV, one row per time step. See `example_input.csv` (template only, values are m
 
 `observed` is optional. If your columns are named differently, map them with `--cols`.
 
+### SPHY-style monthly output (detected automatically)
+A table with `Years, Months, QALLDTS, STotDTS, RTotDTS, GTotDTS, BTotDTS` works as-is
+(.xlsx, .csv or tab-separated .txt). The year only needs to be on the January row,
+and month names may have trailing spaces. Column mapping used:
+
+| Column  | Plotted as |
+|---------|------------|
+| STotDTS | Snowmelt |
+| GTotDTS | Glacier melt |
+| RTotDTS | Rainfall runoff |
+| BTotDTS | Baseflow |
+| QALLDTS | not plotted, only used to check that the four components add up to it |
+
+    python runoff_animation.py --csv sphy_output.xlsx --basin "My basin" --out runoff.mp4
+    python runoff_animation.py --csv sphy_output.xlsx --sheet Sheet2 --out runoff.gif
+
+For .xlsx input also `pip install openpyxl`.
+
 ## Run
     python runoff_animation.py --demo --out demo.mp4                 # synthetic test data
     python runoff_animation.py --csv my_basin.csv --basin "My basin" --out runoff.mp4
