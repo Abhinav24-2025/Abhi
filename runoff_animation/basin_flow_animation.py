@@ -379,7 +379,8 @@ def main():
              "Amounts: monthly runoff components at the basin outlet (model output). "
              "Particle start locations are illustrative (by elevation"
              + (" / glacier outlines" if a.glaciers else "") +
-             "), not modelled per cell.\nParticle speed is not to scale. "
+             "), not modelled per cell.\nValues are interpolated between months for "
+             "smooth motion. Particle speed is not to scale. "
              "One particle ≈ a fixed share of flow; river width scales with total "
              "runoff and upstream length.", fontsize=8, color=INK_3)
 
