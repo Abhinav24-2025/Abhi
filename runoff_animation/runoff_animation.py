@@ -36,7 +36,8 @@ import argparse
 import sys
 
 import matplotlib
-matplotlib.use("Agg")
+if "ipykernel" not in sys.modules:  # keep notebook inline plots working
+    matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -64,7 +65,22 @@ INK_2 = "#52514e"
 GRID = "#e4e3df"
 
 
-def parse_args():
+def make_writer(out, fps, bitrate):
+    """GIF via Pillow; MP4 via ffmpeg (system ffmpeg, else the imageio-ffmpeg
+    pip package, which bundles one)."""
+    if out.lower().endswith(".gif"):
+        return PillowWriter(fps=fps)
+    if not FFMpegWriter.isAvailable():
+        try:
+            import imageio_ffmpeg
+            plt.rcParams["animation.ffmpeg_path"] = imageio_ffmpeg.get_ffmpeg_exe()
+        except ImportError:
+            sys.exit("ffmpeg not found. Run `pip install imageio-ffmpeg`, "
+                     "or save as .gif instead.")
+    return FFMpegWriter(fps=fps, bitrate=bitrate)
+
+
+def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--csv", help="input file (.csv, .txt tab/comma, .xlsx) "
@@ -95,7 +111,7 @@ def parse_args():
     p.add_argument("--dpi", type=int, default=120)
     p.add_argument("--out", default="runoff_animation.mp4",
                    help=".mp4 (needs ffmpeg) or .gif")
-    return p.parse_args()
+    return p.parse_args(argv)
 
 
 def demo_data():
@@ -195,8 +211,9 @@ def load_data(a):
     return df
 
 
-def main():
-    a = parse_args()
+def main(argv=None):
+    """Run from Python/Jupyter with main(["--flag", "value", ...])."""
+    a = parse_args(argv)
     df = load_data(a)
     if a.start or a.end:
         df = df.loc[a.start:a.end]
@@ -316,13 +333,12 @@ def main():
 
     anim = FuncAnimation(fig, update, frames=frames, interval=1000 / a.fps,
                          blit=False)
-    if a.out.lower().endswith(".gif"):
-        writer = PillowWriter(fps=a.fps)
-    else:
-        writer = FFMpegWriter(fps=a.fps, bitrate=2400)
+    writer = make_writer(a.out, a.fps, 2400)
     print(f"Rendering {len(frames)} frames -> {a.out}")
     anim.save(a.out, writer=writer, dpi=a.dpi, savefig_kwargs={"facecolor": SURFACE})
+    plt.close(fig)
     print("Done.")
+    return a.out
 
 
 if __name__ == "__main__":

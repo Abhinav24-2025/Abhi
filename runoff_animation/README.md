@@ -1,3 +1,11 @@
+# Runoff animations
+
+**Easiest: open `Basin_Runoff_Animation.ipynb` in Jupyter or Google Colab** and run the cells
+top to bottom. The scripts are inside it, it has an upload step, and the only cell you edit is
+**Step 4 (Settings)**, where you replace the `YOUR_...` placeholders with your file names.
+
+---
+
 # Runoff component animation
 
 Animated stacked-area chart of basin runoff split into **snowmelt, glacier melt,

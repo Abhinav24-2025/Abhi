@@ -38,11 +38,12 @@ import sys
 from types import SimpleNamespace
 
 import matplotlib
-matplotlib.use("Agg")
+if "ipykernel" not in sys.modules:  # keep notebook inline plots working
+    matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib.animation import FFMpegWriter, FuncAnimation, PillowWriter
+from matplotlib.animation import FuncAnimation
 from matplotlib.collections import LineCollection
 
 import geopandas as gpd
@@ -53,7 +54,7 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components, dijkstra
 from scipy.spatial import cKDTree
 
-from runoff_animation import COMPONENTS, LABELS, load_data
+from runoff_animation import COMPONENTS, LABELS, load_data, make_writer
 
 # Particle colours, checked for colour-blind separation when all four are mixed
 # together on the dark map background (white/cyan/blue/amber).
@@ -70,7 +71,7 @@ INK_3 = "#8a8980"
 RIVER = "#5b6f86"
 
 
-def parse_args():
+def parse_args(argv=None):
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--boundary", required=True)
@@ -100,7 +101,7 @@ def parse_args():
     p.add_argument("--seed", type=int, default=1)
     p.add_argument("--dpi", type=int, default=110)
     p.add_argument("--out", default="basin_flow.mp4", help=".mp4 (ffmpeg) or .gif")
-    return p.parse_args()
+    return p.parse_args(argv)
 
 
 # ---------------------------------------------------------------- GIS input
@@ -197,8 +198,9 @@ def orient_to_outlet(coords, edges, outlet):
 
 
 # ---------------------------------------------------------------- main
-def main():
-    a = parse_args()
+def main(argv=None):
+    """Run from Python/Jupyter with main(["--flag", "value", ...])."""
+    a = parse_args(argv)
     rng = np.random.default_rng(a.seed)
 
     # runoff table (reuses the loader from runoff_animation.py)
@@ -442,11 +444,12 @@ def main():
     hold = a.fps
     frames = list(range(n_frames)) + [n_frames - 1] * hold
     anim = FuncAnimation(fig, update, frames=frames, interval=1000 / a.fps, blit=False)
-    writer = (PillowWriter(fps=a.fps) if a.out.lower().endswith(".gif")
-              else FFMpegWriter(fps=a.fps, bitrate=4000))
+    writer = make_writer(a.out, a.fps, 4000)
     print(f"Rendering {len(frames)} frames -> {a.out}")
     anim.save(a.out, writer=writer, dpi=a.dpi, savefig_kwargs={"facecolor": BG})
+    plt.close(fig)
     print("Done.")
+    return a.out
 
 
 if __name__ == "__main__":
